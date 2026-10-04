@@ -1,0 +1,11 @@
+# 构建上下文排除项：减小上下文体积、防止本地密钥被打进镜像
+target/
+**/application-dev.yml
+.idea/
+*.iml
+*.iws
+*.ipr
+.mvn/wrapper/maven-wrapper.jar
+.git
+.gitignore
+HELP.md

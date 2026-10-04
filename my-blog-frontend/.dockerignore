@@ -1,0 +1,11 @@
+# 关键：禁止把宿主机 node_modules 拷入容器覆盖 Linux 依赖
+node_modules
+dist
+coverage
+.vscode/
+.idea/
+*.log
+.git
+.gitignore
+Dockerfile
+.dockerignore

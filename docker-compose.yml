@@ -1,0 +1,82 @@
+# 敏感值全部从同目录 .env 文件读取（.env 不提交，模板见 .env.example）
+# 使用：cp .env.example .env 并填入真实值，然后 docker compose up -d
+services:
+  # ---- MySQL 数据库 ----
+  mysql:
+    build: ./docker/mysql
+    image: blog-mysql:8.4
+    container_name: blog-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: my_blog
+      TZ: Asia/Shanghai
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - blog-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ---- Redis 缓存 ----
+  redis:
+    image: redis:7-alpine
+    container_name: blog-redis
+    # 密码通过环境变量注入；healthcheck 用 REDISCLI_AUTH，避免密码出现在进程参数中
+    environment:
+      REDISCLI_AUTH: ${REDIS_PASSWORD}
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    networks:
+      - blog-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ---- Spring Boot 后端 ----
+  backend:
+    build: ./my-blog-backend
+    container_name: blog-backend
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # 容器内跑生产配置：application-prod.yml 的占位符只按下述名字解析
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:mysql://mysql:3306/my_blog?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+      DB_USERNAME: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+    networks:
+      - blog-network
+
+  # ---- Vue 前端 ----
+  frontend:
+    build: ./my-blog-frontend
+    container_name: blog-frontend
+    depends_on:
+      - backend
+    ports:
+      - "80:80"    # 宿主机 80 端口映射到容器 80
+    networks:
+      - blog-network
+
+# 数据卷：MySQL 数据持久化
+volumes:
+  mysql-data:
+
+# 网络：所有服务在同一个网络里，可以用服务名互访
+networks:
+  blog-network:
+    driver: bridge

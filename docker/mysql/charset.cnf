@@ -1,0 +1,4 @@
+# MySQL 8.4 客户端默认字符集改为 auto，容器 POSIX locale 下会回退 latin1；
+# 此处显式锁定，保证 init 脚本导入及手动排查时都按 utf8mb4 通信
+[client]
+default-character-set=utf8mb4
