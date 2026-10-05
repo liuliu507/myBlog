@@ -27,7 +27,7 @@ onMounted(() => {
 <style scoped>
 .app-container {
   min-height: 100vh;
-  background: #f5f7fa;
+  background: var(--page-bg);
 }
 
 @media (max-width: 767px) {

@@ -139,9 +139,10 @@ onMounted(loadList)
 .category-page {
   max-width: 900px;
   margin: 0 auto;
-  background: #fff;
-  padding: 24px;
-  border-radius: 6px;
+  background: var(--surface);
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
 }
 .header {
   display: flex;
@@ -150,7 +151,18 @@ onMounted(loadList)
   margin-bottom: 20px;
 }
 .page-title {
-  font-size: 22px;
-  font-weight: bold;
+  color: var(--ink);
+  font-size: 24px;
+  font-weight: 720;
+}
+
+@media (max-width: 767px) {
+  .category-page {
+    padding: 20px 14px;
+  }
+  .header {
+    align-items: flex-start;
+    gap: 12px;
+  }
 }
 </style>

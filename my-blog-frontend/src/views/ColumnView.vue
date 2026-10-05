@@ -62,18 +62,23 @@ watch(() => route.params.categoryId, load, { immediate: true })
 .column {
   max-width: 800px;
   margin: 0 auto;
-  background: #fff;
-  padding: 32px;
-  border-radius: 6px;
+  background: var(--surface);
+  padding: 38px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
   min-height: 400px;
 }
+.head {
+  padding: 8px 0 4px;
+}
 .head .title {
-  font-size: 26px;
-  font-weight: bold;
+  color: var(--ink);
+  font-size: 30px;
+  font-weight: 720;
 }
 .head .sub {
   margin-top: 8px;
-  color: #909399;
+  color: var(--muted);
   font-size: 14px;
 }
 .article-list {
@@ -86,26 +91,27 @@ watch(() => route.params.categoryId, load, { immediate: true })
 }
 .article-title {
   font-size: 18px;
-  font-weight: bold;
-  color: #303133;
+  font-weight: 680;
+  color: var(--ink);
 }
 .article-summary {
   margin-top: 8px;
-  color: #606266;
+  color: #56635b;
   font-size: 14px;
+  line-height: 1.7;
 }
 .article-meta {
   margin-top: 12px;
-  color: #909399;
+  color: var(--muted);
   font-size: 13px;
 }
 
 @media (max-width: 767px) {
   .column {
-    padding: 16px;
+    padding: 22px 16px;
   }
   .head .title {
-    font-size: 21px;
+    font-size: 25px;
   }
   .article-list {
     gap: 12px;

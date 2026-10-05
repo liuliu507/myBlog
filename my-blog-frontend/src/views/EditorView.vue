@@ -144,18 +144,33 @@ onMounted(async () => {
 .editor {
   max-width: 800px;
   margin: 0 auto;
-  background: #fff;
-  padding: 32px;
-  border-radius: 6px;
+  background: var(--surface);
+  padding: 36px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
 }
 .page-title {
-  font-size: 22px;
-  font-weight: bold;
-  margin-bottom: 24px;
+  margin: 0 0 26px;
+  color: var(--ink);
+  font-size: 25px;
+  font-weight: 720;
+}
+.editor :deep(.el-form-item__label) {
+  color: #47564d;
+  font-weight: 620;
+}
+.editor :deep(textarea) {
+  line-height: 1.7;
 }
 .actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+}
+
+@media (max-width: 767px) {
+  .editor {
+    padding: 22px 16px;
+  }
 }
 </style>

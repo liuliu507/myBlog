@@ -92,16 +92,24 @@ watch(() => route.query.categoryId, loadList, { immediate: true })
 .mine {
   max-width: 900px;
   margin: 0 auto;
-  background: #fff;
-  padding: 24px;
-  border-radius: 6px;
+  background: var(--surface);
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
 }
 .page-title {
-  font-size: 22px;
-  font-weight: bold;
-  margin-bottom: 20px;
+  margin: 0 0 22px;
+  color: var(--ink);
+  font-size: 24px;
+  font-weight: 720;
 }
 .filter-bar {
   margin-bottom: 12px;
+}
+
+@media (max-width: 767px) {
+  .mine {
+    padding: 20px 14px;
+  }
 }
 </style>

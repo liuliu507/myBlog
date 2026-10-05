@@ -43,49 +43,78 @@ function handleCommand(cmd) {
 
 <style scoped>
 .app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #fff;
-  border-bottom: 1px solid #eee;
+  height: 68px;
+  padding: 0 max(24px, calc((100vw - var(--content-width)) / 2));
+  background: rgb(255 255 255 / 94%);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(12px);
 }
 .logo {
-  font-size: 20px;
-  font-weight: bold;
+  position: relative;
+  padding-left: 18px;
+  font-size: 19px;
+  font-weight: 750;
   cursor: pointer;
-  color: #409eff;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.logo::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 9px;
+  height: 20px;
+  border-radius: 3px;
+  background: var(--accent);
+  content: '';
+  transform: translateY(-50%);
 }
 .nav {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
 }
 .user-name {
   cursor: pointer;
   margin-left: 8px;
-  color: #333;
+  color: var(--ink);
+  font-size: 14px;
 }
 
 @media (max-width: 767px) {
   .app-header {
-    padding: 0 12px;
+    height: 60px;
+    padding: 0 14px;
   }
   .logo {
-    font-size: 18px;
-    white-space: nowrap;
+    font-size: 16px;
     flex-shrink: 0;
   }
   .nav {
-    gap: 2px;
+    gap: 0;
+    max-width: 70%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav::-webkit-scrollbar {
+    display: none;
   }
   .nav :deep(.el-button) {
-    padding-left: 6px;
-    padding-right: 6px;
+    flex-shrink: 0;
+    padding: 8px 7px;
+    font-size: 13px;
   }
   .user-name {
     display: inline-block;
-    margin-left: 4px;
-    max-width: 72px;
+    margin-left: 2px;
+    max-width: 60px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

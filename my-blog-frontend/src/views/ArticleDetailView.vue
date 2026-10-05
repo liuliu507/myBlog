@@ -80,15 +80,17 @@ onMounted(loadDetail)
 
 <style scoped>
 .detail {
-  max-width: 800px;
+  max-width: var(--reading-width);
   margin: 0 auto;
-  background: #fff;
-  padding: 32px;
-  border-radius: 6px;
-  min-height: 400px;
+  padding: 48px 56px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  min-height: 440px;
 }
 .header {
   position: relative;
+  padding-bottom: 8px;
 }
 .category-link {
   text-decoration: none;
@@ -97,11 +99,15 @@ onMounted(loadDetail)
   cursor: pointer;
 }
 .title {
-  font-size: 26px;
-  margin: 0 0 12px;
+  max-width: 620px;
+  margin: 0 0 20px;
+  color: var(--ink);
+  font-size: 34px;
+  font-weight: 740;
+  line-height: 1.3;
 }
 .meta {
-  color: #909399;
+  color: var(--muted);
   font-size: 14px;
   display: flex;
   gap: 8px;
@@ -113,27 +119,34 @@ onMounted(loadDetail)
   top: 0;
 }
 .content {
-  font-size: 16px;
-  line-height: 1.8;
-  color: #303133;
+  padding-top: 8px;
+  color: #35433a;
+  font-size: 17px;
+  line-height: 1.95;
   white-space: pre-wrap;
   word-break: break-word;
 }
 
+.detail :deep(.el-divider) {
+  margin: 28px 0;
+  border-color: var(--line);
+}
+
 @media (max-width: 767px) {
   .detail {
-    padding: 16px;
+    padding: 26px 20px;
+    min-height: 360px;
   }
   .title {
-    font-size: 21px;
+    font-size: 26px;
   }
   .actions {
     position: static;
     margin-top: 12px;
   }
   .content {
-    font-size: 15px;
-    line-height: 1.7;
+    font-size: 16px;
+    line-height: 1.85;
   }
 }
 </style>
