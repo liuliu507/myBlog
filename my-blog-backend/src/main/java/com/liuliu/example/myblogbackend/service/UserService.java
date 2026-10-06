@@ -111,16 +111,16 @@ public class UserService {
             throw new BusinessException(ErrorCode.NOT_FOUND, "该邮箱未注册");
         }
 
-        // 2. 频率限制：60 秒内不能重复发（用 Redis 判断）
+        // 2. 频率限制：60 秒内不能重复发
         String limitKey = "email:limit:" + email;
         if (Boolean.TRUE.equals(redisUtil.hasKey(limitKey))) {
-            throw new RuntimeException("发送太频繁，请 60 秒后再试");
+            throw new BusinessException (ErrorCode.TOO_MANY_REQUESTS, "发送太频繁，请 60 秒后再试" );
         }
 
         // 次数限制：每分钟最多5次
         String rateKey = "rate:send-code:" + email;
         if (!redisUtil.tryAcquire(rateKey, 5, 60)) {
-            throw new RuntimeException("操作太频繁，请稍后再试");
+            throw new BusinessException (ErrorCode.TOO_MANY_REQUESTS, "操作太频繁，请稍后再试" );
         }
 
         // 3. 生成 6 位验证码
@@ -132,6 +132,9 @@ public class UserService {
 
         // 5. 发邮件
         emailUtil.sendCode(email, code);
+
+        // 6. 发送成功后写入冷却标记，60 秒内禁止重复发送
+        redisUtil.set(limitKey, "1" , 60 );
     }
 
     /** 用验证码重置密码 */
@@ -140,10 +143,10 @@ public class UserService {
         String cachedCode = redisUtil.get(codeKey);
 
         if (cachedCode == null) {
-            throw new RuntimeException("验证码已过期，请重新获取");
+            throw new BusinessException (ErrorCode.PARAM_ERROR, "验证码已过期，请重新获取" );
         }
         if (!cachedCode.equals(req.getCode())) {
-            throw new RuntimeException("验证码错误");
+            throw new BusinessException (ErrorCode.PARAM_ERROR, "验证码错误" );
         }
 
         // 更新密码
