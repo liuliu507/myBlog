@@ -2,6 +2,7 @@ package com.liuliu.example.myblogbackend.interceptor;
 
 import tools.jackson.databind.ObjectMapper;
 import com.liuliu.example.myblogbackend.common.Result;
+import com.liuliu.example.myblogbackend.common.ErrorCode;
 import com.liuliu.example.myblogbackend.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,7 +42,7 @@ public class JwtInterceptor implements HandlerInterceptor {
                 Claims claims = jwtUtil.parseToken(token);
                 request.setAttribute("userId", Long.valueOf(claims.getSubject()));
             } catch (Exception e) {
-                writeError(response, 401, "登录已过期或无效");
+                writeError(response, ErrorCode.UNAUTHORIZED.getCode(), "登录已过期或无效");
                 return false;
             }
         }
@@ -49,7 +50,7 @@ public class JwtInterceptor implements HandlerInterceptor {
         // 公开路径放行；非公开路径必须有 userId
         if (isPublic) return true;
         if (request.getAttribute("userId") == null) {
-            writeError(response, 401, "未登录");
+            writeError(response, ErrorCode.UNAUTHORIZED.getCode(), "未登录");
             return false;
         }
         return true;
