@@ -36,3 +36,7 @@ logging:
 
 jwt:
   secret: ${JWT_SECRET}
+
+glm:
+  # 敏感值必须注入，无默认值 → 缺失时 fail-fast
+  api-key: ${GLM_API_KEY}

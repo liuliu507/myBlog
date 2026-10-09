@@ -7,6 +7,7 @@
         <el-button text @click="$router.push('/mine')">我的文章</el-button>
         <el-button text @click="$router.push('/categories')">分类</el-button>
         <el-button type="primary" @click="$router.push('/editor')">写文章</el-button>
+        <el-button text @click="aiStore.openDrawer()">AI 助手</el-button>
         <el-dropdown @command="handleCommand">
           <span class="user-name">{{ userStore.userInfo?.nickname || '我' }}</span>
           <template #dropdown>
@@ -28,9 +29,11 @@
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
+import { useAiStore } from '@/stores/ai'
 
 const router = useRouter()
 const userStore = useUserStore()
+const aiStore = useAiStore()
 
 function handleCommand(cmd) {
   if (cmd === 'logout') {

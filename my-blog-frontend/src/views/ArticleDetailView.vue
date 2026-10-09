@@ -37,16 +37,18 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getArticle, deleteArticle } from '@/api/article'
 import { formatTime } from '@/utils/format'
 import { useUserStore } from '@/stores/user'
+import { useAiStore } from '@/stores/ai'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+const aiStore = useAiStore()
 
 const article = ref(null)
 const loading = ref(false)
@@ -59,6 +61,10 @@ async function loadDetail() {
   loading.value = true
   try {
     article.value = await getArticle(route.params.id)
+    // 进入文章页时注入阅读上下文，让 AI 助手能“读懂”当前文章
+    if (article.value) {
+      aiStore.setContext({ id: article.value.id, title: article.value.title, content: article.value.content })
+    }
   } catch (e) {
     article.value = null
   } finally {
@@ -76,6 +82,9 @@ async function onDelete() {
 }
 
 onMounted(loadDetail)
+
+// 离开文章页时清除阅读上下文，抽屉恢复为通用对话
+onUnmounted(() => aiStore.clearContext())
 </script>
 
 <style scoped>

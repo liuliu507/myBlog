@@ -45,3 +45,6 @@ mybatis-plus:
 
 jwt:
   secret: 你的JWT密码，需要自己设置，至少要32个字节
+
+glm:
+  api-key: 你的智谱APIKey

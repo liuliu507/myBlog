@@ -82,7 +82,7 @@ public class UserService {
         LoginResponse.UserInfo info = new LoginResponse.UserInfo();
         info.setId(user.getId());
         info.setNickname(user.getNickname());
-        info.setEmail(user.getEmail());
+        info.setEmail(user.getEmail()); 
         info.setAvatar(user.getAvatar());
         resp.setUser(info);
         return resp;

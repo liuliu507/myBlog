@@ -58,6 +58,8 @@ services:
       MAIL_USERNAME: ${MAIL_USERNAME}
       MAIL_PASSWORD: ${MAIL_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
+      # 智谱 GLM API Key
+      GLM_API_KEY: ${GLM_API_KEY}
     networks:
       - blog-network
 

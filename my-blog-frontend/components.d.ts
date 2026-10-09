@@ -11,6 +11,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AiChatDrawer: typeof import('./src/components/ai/AiChatDrawer.vue')['default']
     AppHeader: typeof import('./src/components/layout/AppHeader.vue')['default']
     AuthCard: typeof import('./src/components/auth/AuthCard.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
@@ -18,6 +19,7 @@ declare module 'vue' {
     ElContainer: typeof import('element-plus/es')['ElContainer']
     ElDialog: typeof import('element-plus/es')['ElDialog']
     ElDivider: typeof import('element-plus/es')['ElDivider']
+    ElDrawer: typeof import('element-plus/es')['ElDrawer']
     ElDropdown: typeof import('element-plus/es')['ElDropdown']
     ElDropdownItem: typeof import('element-plus/es')['ElDropdownItem']
     ElDropdownMenu: typeof import('element-plus/es')['ElDropdownMenu']

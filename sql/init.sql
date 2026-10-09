@@ -56,6 +56,17 @@ CREATE TABLE `email_code` (
   KEY `idx_email_type` (`email`, `type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='邮箱验证码表';
 
+CREATE TABLE `chat_message` (
+  `id`         BIGINT      NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `user_id`    BIGINT      NOT NULL COMMENT '所属用户',
+  `role`       VARCHAR(16) NOT NULL COMMENT '消息角色 user/assistant',
+  `content`    TEXT        NOT NULL COMMENT '消息内容',
+  `article_id` BIGINT      DEFAULT NULL COMMENT '关联文章（文章页对话时）',
+  `created_at` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_user_created` (`user_id`, `created_at`) COMMENT '按用户+时间查历史'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='AI对话记录';
+
 INSERT INTO `user` (`email`, `password`, `nickname`)
 VALUES ('test@example.com', 'placeholder_will_be_replaced', '测试用户');
 
