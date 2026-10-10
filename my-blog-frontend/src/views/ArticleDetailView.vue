@@ -332,6 +332,18 @@ onUnmounted(() => aiStore.clearContext())
 .detail :deep(.md-editor-preview) {
   font-size: 17px;
   line-height: 1.95;
+  /* 防止正文图片/表格/长代码在手机上撑破页面 */
+  max-width: 100%;
+  overflow-x: auto;
+}
+.detail :deep(.md-editor-preview img) {
+  max-width: 100%;
+  height: auto;
+}
+.detail :deep(.md-editor-preview table) {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 /* 点赞 */

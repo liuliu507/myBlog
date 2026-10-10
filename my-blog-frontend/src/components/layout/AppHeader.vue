@@ -139,14 +139,19 @@ async function onFileChange(e) {
   .app-header {
     height: 60px;
     padding: 0 14px;
+    max-width: 100%;
   }
   .logo {
     font-size: 16px;
     flex-shrink: 0;
   }
   .nav {
+    /* flex:1 + min-width:0 是关键：允许导航栏被压缩到剩余宽度，
+       超出部分走内部横向滚动，而不是把整个页面撑宽（真手机 WebKit 必需） */
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: none;
     gap: 0;
-    max-width: 70%;
     overflow-x: auto;
     scrollbar-width: none;
   }
@@ -161,6 +166,7 @@ async function onFileChange(e) {
   .user-trigger {
     margin-left: 2px;
     gap: 4px;
+    flex-shrink: 0;
   }
   .user-name {
     display: inline-block;
