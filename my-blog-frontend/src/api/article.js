@@ -4,6 +4,10 @@ export function listArticles(params) {
   return request.get('/articles', { params })
 }
 
+export function searchArticles(params) {
+  return request.get('/articles/search', { params })
+}
+
 export function getArticle(id) {
   return request.get(`/articles/${id}`)
 }

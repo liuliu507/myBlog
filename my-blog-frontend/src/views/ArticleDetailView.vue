@@ -21,6 +21,17 @@
           <el-tag v-if="article.status === 0" type="warning" size="small">草稿</el-tag>
         </div>
 
+        <div v-if="article.tags?.length" class="article-tags">
+          <router-link
+            v-for="t in article.tags"
+            :key="t.id"
+            :to="`/tag/${t.id}`"
+            class="article-tag"
+          >
+            # {{ t.name }}
+          </router-link>
+        </div>
+
         <div v-if="isAuthor" class="actions">
           <el-button size="small" @click="$router.push(`/editor/${article.id}`)">
             编辑
@@ -318,6 +329,20 @@ onUnmounted(() => aiStore.clearContext())
   display: flex;
   gap: 8px;
   align-items: center;
+}
+.article-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 14px;
+}
+.article-tag {
+  color: var(--accent);
+  font-size: 13.5px;
+  text-decoration: none;
+}
+.article-tag:hover {
+  text-decoration: underline;
 }
 .actions {
   position: absolute;

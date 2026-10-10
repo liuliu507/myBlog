@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class ArticleRequest {
 
@@ -18,6 +20,9 @@ public class ArticleRequest {
     private String content;
 
     private Long categoryId;
+
+    /** 标签名列表：已存在则复用，不存在则创建（全局共享） */
+    private List<String> tags;
 
     // 0草稿 1发布，不传默认草稿
     private Integer status = 0;

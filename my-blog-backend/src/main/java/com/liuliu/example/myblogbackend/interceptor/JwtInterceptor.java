@@ -71,9 +71,11 @@ public class JwtInterceptor implements HandlerInterceptor {
 
     private boolean isPublicGet(String method, String uri) {
         if (!"GET".equalsIgnoreCase(method)) return false;
-        // 公开浏览：文章列表/详情；个人专栏详情（含该专栏已发布文章）；文章评论树
+        // 公开浏览：文章列表/详情/全文搜索；个人专栏详情（含该专栏已发布文章）；文章评论树；标签云
         // 注意 GET /api/categories（我的分类列表）不在此列，仍需登录
         return uri.matches("^/api/articles(/\\d+)?$")
+                || uri.matches("^/api/articles/search$")
+                || uri.matches("^/api/tags$")
                 || uri.matches("^/api/categories/\\d+$")
                 || uri.matches("^/api/comments$");
     }

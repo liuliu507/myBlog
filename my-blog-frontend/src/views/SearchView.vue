@@ -1,37 +1,28 @@
 <template>
-  <div class="home">
-    <header class="home-heading">
-      <div>
-        <div class="eyebrow">BLOG · NOTES</div>
-        <h1 class="page-title">{{ tagMode ? `# ${tagName || '标签'}` : '最新文章' }}</h1>
-      </div>
-      <p class="heading-note">{{ tagMode ? '该标签下的全部已发布文章' : '记录想法，也分享值得回看的内容。' }}</p>
+  <div class="search-page">
+    <header class="search-heading">
+      <div class="eyebrow">SEARCH</div>
+      <h1 class="page-title">搜索：{{ keyword }}</h1>
+      <p v-if="!loading" class="heading-note">共找到 {{ total }} 篇相关文章</p>
     </header>
 
-    <el-empty v-if="!loading && list.length === 0" :description="tagMode ? '该标签下还没有文章' : '还没有文章'" />
+    <el-empty v-if="!loading && list.length === 0" description="没有找到相关文章，换个关键词试试" />
 
     <div v-loading="loading" class="article-list">
       <el-card
         v-for="item in list"
         :key="item.id"
-        :class="['article-card', { featured: !tagMode && list[0]?.id === item.id }]"
+        class="article-card"
         shadow="hover"
         @click="goDetail(item.id)"
       >
         <div class="article-topline">
-          <router-link
-            v-if="item.categoryName"
-            :to="`/authors/${item.userId}/categories/${item.categoryId}`"
-            class="category-link"
-            @click.stop
-          >
-            <el-tag size="small" effect="plain">{{ item.categoryName }}</el-tag>
-          </router-link>
+          <el-tag v-if="item.categoryName" size="small" effect="plain">{{ item.categoryName }}</el-tag>
           <span v-else class="article-label">文章</span>
           <span>{{ formatTime(item.createdAt) }}</span>
         </div>
-        <h2 class="title">{{ item.title }}</h2>
-        <p class="summary">{{ item.summary || '暂无摘要' }}</p>
+        <h2 class="title" v-html="highlight(item.title)"></h2>
+        <p class="summary" v-html="highlight(item.summary || '暂无摘要')"></p>
         <div v-if="item.tags?.length" class="tag-row">
           <router-link
             v-for="t in item.tags"
@@ -67,10 +58,9 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { listArticles } from '@/api/article'
-import { listTags } from '@/api/tag'
+import { searchArticles } from '@/api/article'
 import { formatTime } from '@/utils/format'
 
 const route = useRoute()
@@ -80,18 +70,43 @@ const loading = ref(false)
 const page = ref(1)
 const size = ref(10)
 const total = ref(0)
-const tagName = ref('')
 
-// 路由 /tag/:tagId 时为标签筛选模式（复用本页）
-const tagMode = computed(() => route.name === 'tag-articles')
-const tagId = computed(() => (tagMode.value ? Number(route.params.tagId) : null))
+const keyword = ref(String(route.query.keyword || ''))
+
+/**
+ * 关键词高亮（防 XSS）：
+ * 文章标题/摘要来自其他用户输入，必须先整体 HTML 转义，再给命中词包 <mark>；
+ * 不能直接把原文塞进 v-html，否则 <script>/<img onerror> 会被执行
+ */
+function escapeHtml(text) {
+  return String(text).replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  }[c]))
+}
+
+function highlight(text) {
+  const safe = escapeHtml(text || '')
+  const kw = keyword.value.trim()
+  if (!kw) return safe
+  // 转义正则元字符，避免用户输入 ()* 等改变正则语义
+  const pattern = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return safe.replace(new RegExp(`(${pattern})`, 'gi'), '<mark>$1</mark>')
+}
 
 async function loadList() {
+  const kw = String(route.query.keyword || '').trim()
+  if (!kw) {
+    list.value = []
+    total.value = 0
+    return
+  }
   loading.value = true
   try {
-    const params = { page: page.value, size: size.value }
-    if (tagId.value) params.tagId = tagId.value
-    const data = await listArticles(params)
+    const data = await searchArticles({ keyword: kw, page: page.value, size: size.value })
     list.value = data.records
     total.value = data.total
   } finally {
@@ -99,44 +114,29 @@ async function loadList() {
   }
 }
 
-async function loadTagName() {
-  tagName.value = ''
-  if (!tagId.value) return
-  try {
-    const tags = await listTags()
-    tagName.value = tags.find((t) => t.id === tagId.value)?.name || ''
-  } catch {
-    // 标签名不影响主体列表展示
-  }
-}
-
 function goDetail(id) {
   router.push(`/article/${id}`)
 }
 
-// 从首页切到标签页（或切换标签）时组件复用，需要重置分页并重新加载
-watch(tagId, () => {
-  page.value = 1
-  loadTagName()
-  loadList()
-})
+// 顶部搜索框在本页继续搜索时，query 变化、组件复用，需重置分页重新拉取
+watch(
+  () => route.query.keyword,
+  (v) => {
+    keyword.value = String(v || '')
+    page.value = 1
+    loadList()
+  }
+)
 
-onMounted(() => {
-  loadTagName()
-  loadList()
-})
+onMounted(loadList)
 </script>
 
 <style scoped>
-.home {
+.search-page {
   max-width: 850px;
   margin: 0 auto;
 }
-.home-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 24px;
+.search-heading {
   margin: 12px 0 28px;
 }
 .eyebrow {
@@ -152,9 +152,10 @@ onMounted(() => {
   font-size: 30px;
   font-weight: 720;
   line-height: 1.2;
+  word-break: break-word;
 }
 .heading-note {
-  margin: 0 0 2px;
+  margin: 10px 0 0;
   color: var(--muted);
   font-size: 14px;
 }
@@ -169,16 +170,11 @@ onMounted(() => {
   cursor: pointer;
   transition:
     transform 160ms ease,
-    border-color 160ms ease,
-    box-shadow 160ms ease;
+    border-color 160ms ease;
 }
 .article-card:hover {
   border-color: #c5d4c9;
   transform: translateY(-2px);
-}
-.article-card.featured {
-  border-left: 3px solid var(--accent);
-  background: linear-gradient(110deg, #fff 0%, #f8fbf8 100%);
 }
 .article-topline {
   display: flex;
@@ -199,9 +195,6 @@ onMounted(() => {
   font-weight: 680;
   line-height: 1.45;
 }
-.featured .title {
-  font-size: 25px;
-}
 .summary {
   color: #56635b;
   font-size: 14px;
@@ -213,23 +206,6 @@ onMounted(() => {
   line-clamp: 2;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-}
-.meta {
-  color: var(--muted);
-  font-size: 13px;
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-.meta-views {
-  margin-left: auto;
-  font-size: 12px;
-}
-.category-link {
-  text-decoration: none;
-}
-.category-link :deep(.el-tag) {
-  cursor: pointer;
 }
 .tag-row {
   display: flex;
@@ -245,6 +221,23 @@ onMounted(() => {
 .tag-chip:hover {
   text-decoration: underline;
 }
+.meta {
+  color: var(--muted);
+  font-size: 13px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.meta-views {
+  margin-left: auto;
+  font-size: 12px;
+}
+:deep(mark) {
+  background: #fde9a8;
+  color: inherit;
+  padding: 0 2px;
+  border-radius: 2px;
+}
 .pagination {
   display: flex;
   justify-content: center;
@@ -252,25 +245,14 @@ onMounted(() => {
 }
 
 @media (max-width: 767px) {
-  .home-heading {
-    display: block;
-    margin: 4px 0 22px;
-  }
   .page-title {
-    font-size: 26px;
-  }
-  .heading-note {
-    margin-top: 10px;
-    font-size: 13px;
+    font-size: 24px;
   }
   .article-card {
     --el-card-padding: 18px;
   }
   .title {
     font-size: 18px;
-  }
-  .featured .title {
-    font-size: 21px;
   }
 }
 </style>

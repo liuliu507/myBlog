@@ -22,8 +22,18 @@ public class ArticleController {
     @GetMapping
     public Result<Page<ArticleVO>> list(
             @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Long tagId) {
+        return Result.success(articleService.listPublished(page, size, tagId));
+    }
+
+    /** 全文搜索（公开）：关键词 ≥2 字走 FULLTEXT+ngram，单字降级 LIKE，按相关度排序 */
+    @GetMapping("/search")
+    public Result<Page<ArticleVO>> search(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return Result.success(articleService.listPublished(page,size));
+        return Result.success(articleService.search(keyword, page, size));
     }
 
     @GetMapping("/{id}")

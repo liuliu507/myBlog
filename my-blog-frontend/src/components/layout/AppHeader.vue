@@ -3,6 +3,30 @@
     <div class="logo" @click="$router.push('/')">我的博客</div>
     <div class="nav">
       <el-button text @click="$router.push('/')">首页</el-button>
+      <el-button text @click="$router.push('/tags')">标签</el-button>
+      <!-- 搜索：桌面端内联输入框 -->
+      <div class="header-search">
+        <el-button text class="search-toggle" aria-label="搜索" @click="mobileSearchOpen = true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-3.2-3.2" />
+          </svg>
+        </el-button>
+        <el-input
+          v-model="keyword"
+          class="search-input"
+          placeholder="搜索文章…"
+          clearable
+          @keyup.enter="doSearch"
+        >
+          <template #prefix>
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-3.2-3.2" />
+            </svg>
+          </template>
+        </el-input>
+      </div>
       <template v-if="userStore.isLoggedIn">
         <el-button text @click="$router.push('/mine')">我的文章</el-button>
         <el-button text @click="$router.push('/categories')">分类</el-button>
@@ -28,6 +52,17 @@
         <el-button @click="$router.push('/register')">注册</el-button>
       </template>
     </div>
+    <!-- 手机端展开的搜索条：吸顶 header 正下方整条展开，不占导航横向空间 -->
+    <div v-if="mobileSearchOpen" class="mobile-search-bar">
+      <el-input
+        v-model="keyword"
+        placeholder="搜索文章…"
+        clearable
+        autofocus
+        @keyup.enter="doSearch"
+      />
+      <el-button text @click="mobileSearchOpen = false">取消</el-button>
+    </div>
     <!-- 隐藏的文件选择器，点击"更换头像"时触发 -->
     <input
       ref="fileInput"
@@ -40,18 +75,36 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { useAiStore } from '@/stores/ai'
 import { uploadAvatar } from '@/api/upload'
 
+const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 const aiStore = useAiStore()
 const fileInput = ref(null)
 const uploading = ref(false)
+const keyword = ref('')
+const mobileSearchOpen = ref(false)
+
+function doSearch() {
+  const kw = keyword.value.trim()
+  if (!kw) return
+  router.push({ path: '/search', query: { keyword: kw } })
+  mobileSearchOpen.value = false
+}
+
+// 进入/停留搜索页时，输入框与 URL 查询词保持同步
+watch(
+  () => route.query.keyword,
+  (v) => {
+    if (route.name === 'search') keyword.value = v || ''
+  }
+)
 
 function handleCommand(cmd) {
   if (cmd === 'logout') {
@@ -135,6 +188,22 @@ async function onFileChange(e) {
   font-size: 14px;
 }
 
+/* 搜索 */
+.header-search {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.search-toggle {
+  display: none;
+}
+.search-input {
+  width: 190px;
+}
+.mobile-search-bar {
+  display: none;
+}
+
 @media (max-width: 767px) {
   .app-header {
     height: 60px;
@@ -144,6 +213,26 @@ async function onFileChange(e) {
   .logo {
     font-size: 16px;
     flex-shrink: 0;
+  }
+  /* 手机端：内联输入框隐藏，只留放大镜；展开的整条搜索框浮在 header 下方 */
+  .search-input {
+    display: none;
+  }
+  .search-toggle {
+    display: inline-flex;
+  }
+  .mobile-search-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 9;
+    padding: 10px 14px;
+    background: rgb(255 255 255 / 98%);
+    border-bottom: 1px solid var(--line);
   }
   .nav {
     /* flex:1 + min-width:0 是关键：允许导航栏被压缩到剩余宽度，

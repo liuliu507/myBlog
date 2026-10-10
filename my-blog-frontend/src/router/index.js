@@ -56,6 +56,22 @@ const router = createRouter({
       name: 'column',
       component: () => import('@/views/ColumnView.vue'),
     },
+    {
+      // 标签下的文章列表（复用 HomeView）
+      path: '/tag/:tagId',
+      name: 'tag-articles',
+      component: () => import('@/views/HomeView.vue'),
+    },
+    {
+      path: '/tags',
+      name: 'tags',
+      component: () => import('@/views/TagsView.vue'),
+    },
+    {
+      path: '/search',
+      name: 'search',
+      component: () => import('@/views/SearchView.vue'),
+    },
   ],
 })
 

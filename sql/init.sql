@@ -42,7 +42,9 @@ CREATE TABLE `article` (
   `updated_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
   KEY `idx_user_id` (`user_id`),
-  KEY `idx_status_created` (`status`, `created_at`)
+  KEY `idx_status_created` (`status`, `created_at`),
+  -- 全文索引（ngram 中文分词，默认二元切词），供 MATCH...AGAINST 搜索标题/摘要/正文
+  FULLTEXT KEY `ft_article_search` (`title`, `summary`, `content`) WITH PARSER ngram
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='文章表';
 
 CREATE TABLE `email_code` (
@@ -88,6 +90,24 @@ CREATE TABLE `chat_message` (
   PRIMARY KEY (`id`),
   KEY `idx_user_created` (`user_id`, `created_at`) COMMENT '按用户+时间查历史'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='AI对话记录';
+
+CREATE TABLE `tag` (
+  `id`         BIGINT      NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `name`       VARCHAR(32) NOT NULL COMMENT '标签名（全局共享，全站唯一）',
+  `created_at` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='标签表（全局）';
+
+CREATE TABLE `article_tag` (
+  `id`         BIGINT   NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `article_id` BIGINT   NOT NULL COMMENT '文章',
+  `tag_id`     BIGINT   NOT NULL COMMENT '标签',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '关联时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_article_tag` (`article_id`, `tag_id`) COMMENT '防重复关联',
+  KEY `idx_tag` (`tag_id`) COMMENT '按标签反查文章'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='文章-标签关联表';
 
 INSERT INTO `user` (`email`, `password`, `nickname`)
 VALUES ('test@example.com', 'placeholder_will_be_replaced', '测试用户');

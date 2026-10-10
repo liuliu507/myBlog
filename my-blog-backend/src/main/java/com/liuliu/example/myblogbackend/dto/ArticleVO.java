@@ -3,6 +3,7 @@ package com.liuliu.example.myblogbackend.dto;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class ArticleVO {
@@ -21,4 +22,5 @@ public class ArticleVO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String categoryName;
+    private List<TagRef> tags;          // 文章标签（id + 名称）
 }

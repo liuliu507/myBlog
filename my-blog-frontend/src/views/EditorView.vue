@@ -29,6 +29,23 @@
         </el-select>
       </el-form-item>
 
+      <el-form-item label="标签（可选，最多 10 个）">
+        <el-select
+          v-model="form.tags"
+          multiple
+          filterable
+          allow-create
+          default-first-option
+          collapse-tags
+          collapse-tags-tooltip
+          placeholder="选择已有标签，或直接输入新标签后回车"
+          style="width: 100%"
+          @change="onTagsChange"
+        >
+          <el-option v-for="t in tagOptions" :key="t" :label="t" :value="t" />
+        </el-select>
+      </el-form-item>
+
       <el-form-item label="正文" prop="content">
         <MdEditor
           v-model="form.content"
@@ -63,6 +80,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getArticle, createArticle, updateArticle } from '@/api/article'
 import { listCategories } from '@/api/category'
+import { listTags } from '@/api/tag'
 import { uploadArticleImage } from '@/api/upload'
 import { MdEditor } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
@@ -80,6 +98,7 @@ const form = reactive({
   summary: '',
   content: '',
   categoryId: null,
+  tags: [],
   status: 1,
 })
 
@@ -89,6 +108,17 @@ const rules = {
 }
 
 const categories = ref([])
+const tagOptions = ref([])
+
+const MAX_TAGS = 10
+
+/** 标签数上限提示并截断（后端也会兜底） */
+function onTagsChange(val) {
+  if (val.length > MAX_TAGS) {
+    ElMessage.warning(`最多只能添加 ${MAX_TAGS} 个标签`)
+    form.tags = val.slice(0, MAX_TAGS)
+  }
+}
 
 /** md-editor-v3 图片上传回调：files → 后端转发到 COS → 返回 URL 数组 */
 async function onUploadImg(files, callback) {
@@ -108,6 +138,8 @@ async function loadArticle() {
   form.categoryId = data.categoryId || null
   form.content = data.content
   form.status = data.status
+  // 后端返回的标签是 {id,name} 对象，编辑器只提交名字符串
+  form.tags = (data.tags || []).map((t) => t.name)
 }
 
 async function onSave() {
@@ -134,6 +166,7 @@ function resetForm() {
   form.summary = ''
   form.content = ''
   form.categoryId = null
+  form.tags = []
   form.status = 1
 }
 
@@ -152,6 +185,13 @@ watch(
 
 onMounted(async () => {
   categories.value = await listCategories()
+  // 标签云即全部"有已发布文章"的标签，作为下拉建议；未列出的标签仍可直接输入创建
+  try {
+    const tags = await listTags()
+    tagOptions.value = tags.map((t) => t.name)
+  } catch {
+    tagOptions.value = []
+  }
 })
 </script>
 
