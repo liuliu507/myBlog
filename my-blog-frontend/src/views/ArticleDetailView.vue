@@ -29,7 +29,7 @@
 
       <el-divider />
 
-      <div class="content">{{ article.content }}</div>
+      <MdPreview :model-value="article.content" preview-theme="github" />
     </template>
 
     <el-empty v-else-if="!loading" description="文章不存在或无权查看" />
@@ -44,6 +44,8 @@ import { getArticle, deleteArticle } from '@/api/article'
 import { formatTime } from '@/utils/format'
 import { useUserStore } from '@/stores/user'
 import { useAiStore } from '@/stores/ai'
+import { MdPreview } from 'md-editor-v3'
+import 'md-editor-v3/lib/preview.css'
 
 const route = useRoute()
 const router = useRouter()
@@ -127,18 +129,13 @@ onUnmounted(() => aiStore.clearContext())
   right: 0;
   top: 0;
 }
-.content {
-  padding-top: 8px;
-  color: #35433a;
-  font-size: 17px;
-  line-height: 1.95;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
 .detail :deep(.el-divider) {
   margin: 28px 0;
   border-color: var(--line);
+}
+.detail :deep(.md-editor-preview) {
+  font-size: 17px;
+  line-height: 1.95;
 }
 
 @media (max-width: 767px) {
@@ -153,7 +150,7 @@ onUnmounted(() => aiStore.clearContext())
     position: static;
     margin-top: 12px;
   }
-  .content {
+  .detail :deep(.md-editor-preview) {
     font-size: 16px;
     line-height: 1.85;
   }

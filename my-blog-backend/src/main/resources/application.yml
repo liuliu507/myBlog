@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: my-blog-backend
+  servlet:
+    multipart:
+      max-file-size: 6MB      # 单文件上限（文章图 5MB + 余量）
+      max-request-size: 6MB
   mail:
     host: smtp.qq.com
   # 默认本地开发；生产用环境变量 SPRING_PROFILES_ACTIVE=prod 切换
@@ -31,3 +35,9 @@ glm:
   # 智谱 GLM 公共配置（非敏感，dev/prod 共用）
   base-url: https://open.bigmodel.cn/api/paas/v4
   model: glm-4-flash
+
+cos:
+  # 公共配置（非敏感）
+  # 访问域名前缀：https://{bucket}.cos.{region}.myqcloud.com
+  avatar-max-bytes: 2097152    # 头像 2MB
+  article-max-bytes: 5242880   # 文章图片 5MB

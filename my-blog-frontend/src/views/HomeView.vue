@@ -33,7 +33,9 @@
         <h2 class="title">{{ item.title }}</h2>
         <p class="summary">{{ item.summary || '暂无摘要' }}</p>
         <div class="meta">
-          <span class="author-mark">{{ item.authorNickname?.slice(0, 1) || '作' }}</span>
+          <el-avatar :size="22" :src="item.authorAvatar">
+            {{ item.authorNickname?.slice(0, 1) || '作' }}
+          </el-avatar>
           <span>{{ item.authorNickname || '匿名作者' }}</span>
         </div>
       </el-card>
@@ -176,17 +178,6 @@ onMounted(loadList)
   display: flex;
   gap: 8px;
   align-items: center;
-}
-.author-mark {
-  display: grid;
-  width: 22px;
-  height: 22px;
-  place-items: center;
-  border-radius: 50%;
-  color: var(--accent);
-  background: var(--accent-soft);
-  font-size: 11px;
-  font-weight: 700;
 }
 .category-link {
   text-decoration: none;

@@ -101,6 +101,26 @@ public class UserService {
         return info;
     }
 
+    /** 更新头像 URL */
+    public LoginResponse.UserInfo updateAvatar(Long userId, String avatarUrl) {
+        if (avatarUrl == null || avatarUrl.isBlank()) {
+            throw new BusinessException(ErrorCode.PARAM_ERROR, "头像地址不能为空");
+        }
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "用户不存在");
+        }
+        user.setAvatar(avatarUrl);
+        userMapper.updateById(user);
+
+        LoginResponse.UserInfo info = new LoginResponse.UserInfo();
+        info.setId(user.getId());
+        info.setEmail(user.getEmail());
+        info.setNickname(user.getNickname());
+        info.setAvatar(user.getAvatar());
+        return info;
+    }
+
     /** 发送重置密码验证码 */
     public void sendResetCode(String email) {
         // 1. 检查邮箱是否存在

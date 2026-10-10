@@ -40,3 +40,10 @@ jwt:
 glm:
   # 敏感值必须注入，无默认值 → 缺失时 fail-fast
   api-key: ${GLM_API_KEY}
+
+cos:
+  # 腾讯云 COS：敏感值必须注入，无默认值 → 缺失时 fail-fast
+  secret-id: ${COS_SECRET_ID}
+  secret-key: ${COS_SECRET_KEY}
+  bucket: ${COS_BUCKET}
+  region: ${COS_REGION}

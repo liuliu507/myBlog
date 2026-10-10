@@ -152,6 +152,7 @@ public class ArticleService {
         User author = userMapper.selectById(a.getUserId());
         if (author != null) {
             vo.setAuthorNickname(author.getNickname());
+            vo.setAuthorAvatar(author.getAvatar());
         }
         if (a.getCategoryId() != null) {
             Category cat = categoryMapper.selectById(a.getCategoryId());

@@ -7,6 +7,8 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -27,6 +29,14 @@ public class AuthController {
     @GetMapping("/me")
     public Result<LoginResponse.UserInfo> me(@RequestAttribute("userId") Long userId) {
         return Result.success(userService.getUserInfo(userId));
+    }
+
+    /** 更新头像：前端先调 /api/upload/avatar 拿 URL，再调本接口写入数据库 */
+    @PostMapping("/avatar")
+    public Result<LoginResponse.UserInfo> updateAvatar(
+            @RequestAttribute("userId") Long userId,
+            @RequestBody Map<String, String> body) {
+        return Result.success(userService.updateAvatar(userId, body.get("avatar")));
     }
 
     @PostMapping("/send-reset-code")

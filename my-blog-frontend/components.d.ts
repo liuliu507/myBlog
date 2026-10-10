@@ -14,6 +14,7 @@ declare module 'vue' {
     AiChatDrawer: typeof import('./src/components/ai/AiChatDrawer.vue')['default']
     AppHeader: typeof import('./src/components/layout/AppHeader.vue')['default']
     AuthCard: typeof import('./src/components/auth/AuthCard.vue')['default']
+    ElAvatar: typeof import('element-plus/es')['ElAvatar']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCard: typeof import('element-plus/es')['ElCard']
     ElContainer: typeof import('element-plus/es')['ElContainer']

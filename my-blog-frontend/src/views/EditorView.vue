@@ -30,11 +30,13 @@
       </el-form-item>
 
       <el-form-item label="正文" prop="content">
-        <el-input
+        <MdEditor
           v-model="form.content"
-          type="textarea"
-          :rows="16"
-          placeholder="支持换行，暂不支持 Markdown"
+          :on-upload-img="onUploadImg"
+          :style="{ height: '500px' }"
+          language="zh-CN"
+          preview-theme="github"
+          :toolbars-exclude="['github', 'save', 'htmlPreview', 'catalog']"
         />
       </el-form-item>
 
@@ -61,6 +63,9 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getArticle, createArticle, updateArticle } from '@/api/article'
 import { listCategories } from '@/api/category'
+import { uploadArticleImage } from '@/api/upload'
+import { MdEditor } from 'md-editor-v3'
+import 'md-editor-v3/lib/style.css'
 
 const route = useRoute()
 const router = useRouter()
@@ -84,6 +89,16 @@ const rules = {
 }
 
 const categories = ref([])
+
+/** md-editor-v3 图片上传回调：files → 后端转发到 COS → 返回 URL 数组 */
+async function onUploadImg(files, callback) {
+  const res = await Promise.all(
+    files.map((file) => {
+      return uploadArticleImage(file).then((data) => data.url)
+    })
+  )
+  callback(res)
+}
 
 async function loadArticle() {
   if (!isEdit.value) return
@@ -159,8 +174,10 @@ onMounted(async () => {
   color: #47564d;
   font-weight: 620;
 }
-.editor :deep(textarea) {
-  line-height: 1.7;
+.editor :deep(.md-editor) {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
 }
 .actions {
   display: flex;

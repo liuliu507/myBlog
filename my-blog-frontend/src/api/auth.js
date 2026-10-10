@@ -19,3 +19,8 @@ export function sendResetCode(data) {
 export function resetPassword(data) {
   return request.post('/auth/reset-password', data)
 }
+
+/** 更新头像 URL（先上传图片拿到 URL，再调本接口写入数据库） */
+export function updateAvatar(avatarUrl) {
+  return request.post('/auth/avatar', { avatar: avatarUrl })
+}

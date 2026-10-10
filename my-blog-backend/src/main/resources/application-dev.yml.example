@@ -48,3 +48,9 @@ jwt:
 
 glm:
   api-key: 你的智谱APIKey
+
+cos:
+  secret-id: 你的腾讯云SecretId
+  secret-key: 你的腾讯云SecretKey
+  bucket: 你的COSBucket名
+  region: 你的COSRegion，如ap-guangzhou

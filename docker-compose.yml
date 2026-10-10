@@ -62,6 +62,11 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       # 智谱 GLM API Key
       GLM_API_KEY: ${GLM_API_KEY}
+      # 腾讯云 COS
+      COS_SECRET_ID: ${COS_SECRET_ID}
+      COS_SECRET_KEY: ${COS_SECRET_KEY}
+      COS_BUCKET: ${COS_BUCKET}
+      COS_REGION: ${COS_REGION}
     networks:
       - blog-network
 

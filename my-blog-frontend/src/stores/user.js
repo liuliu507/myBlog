@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { login as loginApi, getMe } from '@/api/auth'
+import { login as loginApi, getMe, updateAvatar as updateAvatarApi } from '@/api/auth'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -21,6 +21,11 @@ export const useUserStore = defineStore('user', {
 
     async fetchMe() {
       const info = await getMe()
+      this.userInfo = info
+    },
+
+    async updateAvatar(avatarUrl) {
+      const info = await updateAvatarApi(avatarUrl)
       this.userInfo = info
     },
 
