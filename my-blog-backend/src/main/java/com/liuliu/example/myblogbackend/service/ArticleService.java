@@ -1,17 +1,21 @@
 package com.liuliu.example.myblogbackend.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.liuliu.example.myblogbackend.common.ErrorCode;
 import com.liuliu.example.myblogbackend.dto.ArticleRequest;
 import com.liuliu.example.myblogbackend.dto.ArticleVO;
 import com.liuliu.example.myblogbackend.entity.Article;
+import com.liuliu.example.myblogbackend.entity.ArticleLike;
 import com.liuliu.example.myblogbackend.entity.Category;
 import com.liuliu.example.myblogbackend.entity.User;
 import com.liuliu.example.myblogbackend.exception.BusinessException;
+import com.liuliu.example.myblogbackend.mapper.ArticleLikeMapper;
 import com.liuliu.example.myblogbackend.mapper.ArticleMapper;
 import com.liuliu.example.myblogbackend.mapper.CategoryMapper;
 import com.liuliu.example.myblogbackend.mapper.UserMapper;
+import com.liuliu.example.myblogbackend.util.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +33,12 @@ public class ArticleService {
 
     @Autowired
     private CategoryMapper categoryMapper;
+
+    @Autowired
+    private ArticleLikeMapper articleLikeMapper;
+
+    @Autowired
+    private RedisUtil redisUtil;
 
     /** 分页查询已发布文章（公开） */
     public Page<ArticleVO> listPublished(int page, int size) {
@@ -54,7 +64,64 @@ public class ArticleService {
         if (article.getStatus() == 0 && !article.getUserId().equals(currentUserId)) {
             throw new BusinessException(ErrorCode.NOT_FOUND, "文章不存在");
         }
-        return toVO(article);
+        ArticleVO vo = toVO(article);
+        // 点赞信息：实时 count（数据量小无需冗余字段，日后成瓶颈再加缓存）
+        vo.setLikeCount(articleLikeMapper.selectCount(
+                new LambdaQueryWrapper<ArticleLike>().eq(ArticleLike::getArticleId, id)));
+        vo.setLikedByMe(currentUserId != null && articleLikeMapper.exists(
+                new LambdaQueryWrapper<ArticleLike>()
+                        .eq(ArticleLike::getArticleId, id)
+                        .eq(ArticleLike::getUserId, currentUserId)));
+        return vo;
+    }
+
+    /**
+     * 点赞/取消点赞切换（登录）。
+     * 依赖 article_like 的 (article_id, user_id) 唯一索引兜底，并发下重复插入会失败。
+     */
+    public ArticleVO toggleLike(Long articleId, Long userId) {
+        Article article = articleMapper.selectById(articleId);
+        if (article == null || article.getStatus() != 1) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "文章不存在");
+        }
+        LambdaQueryWrapper<ArticleLike> wrapper = new LambdaQueryWrapper<ArticleLike>()
+                .eq(ArticleLike::getArticleId, articleId)
+                .eq(ArticleLike::getUserId, userId);
+        if (articleLikeMapper.exists(wrapper)) {
+            articleLikeMapper.delete(wrapper);
+        } else {
+            ArticleLike like = new ArticleLike();
+            like.setArticleId(articleId);
+            like.setUserId(userId);
+            articleLikeMapper.insert(like);
+        }
+        ArticleVO vo = new ArticleVO();
+        vo.setId(articleId);
+        vo.setLikeCount(articleLikeMapper.selectCount(
+                new LambdaQueryWrapper<ArticleLike>().eq(ArticleLike::getArticleId, articleId)));
+        vo.setLikedByMe(articleLikeMapper.exists(wrapper));
+        return vo;
+    }
+
+    /**
+     * 记录浏览：同一用户（未登录用 IP）24h 内只计 1 次（Redis SET NX EX 原子防刷）。
+     * 命中防刷窗口时静默忽略，仍返回当前浏览数。
+     */
+    public Integer recordView(Long articleId, Long userId, String ip) {
+        Article article = articleMapper.selectById(articleId);
+        if (article == null || article.getStatus() != 1) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "文章不存在");
+        }
+        String viewer = userId != null ? "u:" + userId : "ip:" + ip;
+        boolean firstViewToday = redisUtil.setIfAbsent("view:" + articleId + ":" + viewer, "1", 86400);
+        if (firstViewToday) {
+            // 用 SQL 自增而不是查改回写，避免并发丢失更新
+            articleMapper.update(null, new UpdateWrapper<Article>()
+                    .eq("id", articleId)
+                    .setSql("view_count = view_count + 1"));
+            return article.getViewCount() + 1;
+        }
+        return article.getViewCount();
     }
 
     /** 我的文章列表（含草稿），可按分类筛选 */
@@ -146,6 +213,7 @@ public class ArticleService {
         vo.setSummary(a.getSummary());
         vo.setContent(a.getContent());
         vo.setStatus(a.getStatus());
+        vo.setViewCount(a.getViewCount());
         vo.setCreatedAt(a.getCreatedAt());
         vo.setUpdatedAt(a.getUpdatedAt());
 

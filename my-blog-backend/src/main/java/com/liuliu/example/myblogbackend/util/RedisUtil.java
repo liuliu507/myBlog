@@ -35,4 +35,10 @@ public class RedisUtil {
         }
         return count != null && count <= maxCount;
     }
+
+    /** SET NX EX：key 不存在才写入并返回 true，已存在返回 false（原子操作，无并发竞态） */
+    public boolean setIfAbsent(String key, String value, long seconds) {
+        Boolean ok = redisTemplate.opsForValue().setIfAbsent(key, value, Duration.ofSeconds(seconds));
+        return Boolean.TRUE.equals(ok);
+    }
 }

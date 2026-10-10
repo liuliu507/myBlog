@@ -1,8 +1,6 @@
 package com.liuliu.example.myblogbackend.entity;
 
-import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -10,18 +8,14 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("article")
-public class Article {
+@TableName("comment")
+public class Comment {
     @TableId(type = IdType.AUTO)
     private Long id;
+    private Long articleId;
     private Long userId;
-    @TableField(updateStrategy = FieldStrategy.ALWAYS)
-    private Long categoryId;
-    private String title;
-    private String summary;
+    /** 父评论 ID（null = 直接评论文章，非 null = 回复某条评论） */
+    private Long parentId;
     private String content;
-    private Integer status;
-    private Integer viewCount;
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 }

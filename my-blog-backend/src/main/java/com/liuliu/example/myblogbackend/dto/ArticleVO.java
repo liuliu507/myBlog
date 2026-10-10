@@ -15,6 +15,9 @@ public class ArticleVO {
     private String summary;
     private String content;
     private Integer status;
+    private Integer viewCount;          // 浏览次数
+    private Long likeCount;             // 点赞数（实时 count，仅详情接口填充）
+    private Boolean likedByMe;          // 当前用户是否已点赞（仅详情接口填充）
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String categoryName;

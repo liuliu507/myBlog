@@ -32,7 +32,7 @@ public class JwtInterceptor implements HandlerInterceptor {
         String method = request.getMethod();
 
         // 明确公开的路径
-        boolean isPublic = PUBLIC_PATHS.contains(uri) || isPublicGet(method, uri);
+        boolean isPublic = PUBLIC_PATHS.contains(uri) || isPublicGet(method, uri) || isPublicPost(method, uri);
 
         String auth = request.getHeader("Authorization");
 
@@ -71,9 +71,16 @@ public class JwtInterceptor implements HandlerInterceptor {
 
     private boolean isPublicGet(String method, String uri) {
         if (!"GET".equalsIgnoreCase(method)) return false;
-        // 公开浏览：文章列表/详情；个人专栏详情（含该专栏已发布文章）
+        // 公开浏览：文章列表/详情；个人专栏详情（含该专栏已发布文章）；文章评论树
         // 注意 GET /api/categories（我的分类列表）不在此列，仍需登录
         return uri.matches("^/api/articles(/\\d+)?$")
-                || uri.matches("^/api/categories/\\d+$");
+                || uri.matches("^/api/categories/\\d+$")
+                || uri.matches("^/api/comments$");
+    }
+
+    private boolean isPublicPost(String method, String uri) {
+        if (!"POST".equalsIgnoreCase(method)) return false;
+        // 浏览计数对匿名用户开放（按 IP 防刷）
+        return uri.matches("^/api/articles/\\d+/view$");
     }
 }

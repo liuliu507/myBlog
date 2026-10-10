@@ -37,6 +37,7 @@
             {{ item.authorNickname?.slice(0, 1) || '作' }}
           </el-avatar>
           <span>{{ item.authorNickname || '匿名作者' }}</span>
+          <span class="meta-views">{{ item.viewCount ?? 0 }} 次浏览</span>
         </div>
       </el-card>
     </div>
@@ -178,6 +179,10 @@ onMounted(loadList)
   display: flex;
   gap: 8px;
   align-items: center;
+}
+.meta-views {
+  margin-left: auto;
+  font-size: 12px;
 }
 .category-link {
   text-decoration: none;

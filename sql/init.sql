@@ -37,6 +37,7 @@ CREATE TABLE `article` (
   `summary`     VARCHAR(500) DEFAULT NULL COMMENT '摘要',
   `content`     TEXT         NOT NULL COMMENT '正文',
   `status`      TINYINT      NOT NULL DEFAULT 0 COMMENT '0草稿 1已发布',
+  `view_count`  INT          NOT NULL DEFAULT 0 COMMENT '浏览次数',
   `created_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updated_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
@@ -55,6 +56,27 @@ CREATE TABLE `email_code` (
   PRIMARY KEY (`id`),
   KEY `idx_email_type` (`email`, `type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='邮箱验证码表';
+
+CREATE TABLE `comment` (
+  `id`         BIGINT      NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `article_id` BIGINT      NOT NULL COMMENT '所属文章',
+  `user_id`    BIGINT      NOT NULL COMMENT '评论人',
+  `parent_id`  BIGINT      DEFAULT NULL COMMENT '父评论ID（null=直接评论文章，否则为回复）',
+  `content`    TEXT        NOT NULL COMMENT '评论内容',
+  `created_at` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_article_created` (`article_id`, `created_at`) COMMENT '按文章+时间查评论'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='评论表（二级）';
+
+CREATE TABLE `article_like` (
+  `id`         BIGINT   NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `article_id` BIGINT   NOT NULL COMMENT '文章',
+  `user_id`    BIGINT   NOT NULL COMMENT '点赞人',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '点赞时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_article_user` (`article_id`, `user_id`) COMMENT '防重复点赞：DB 唯一约束兜底',
+  KEY `idx_article` (`article_id`) COMMENT '统计文章点赞数'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='文章点赞表';
 
 CREATE TABLE `chat_message` (
   `id`         BIGINT      NOT NULL AUTO_INCREMENT COMMENT '主键',

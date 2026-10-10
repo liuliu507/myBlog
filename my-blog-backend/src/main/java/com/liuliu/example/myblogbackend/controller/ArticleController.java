@@ -5,6 +5,7 @@ import com.liuliu.example.myblogbackend.common.Result;
 import com.liuliu.example.myblogbackend.dto.ArticleRequest;
 import com.liuliu.example.myblogbackend.dto.ArticleVO;
 import com.liuliu.example.myblogbackend.service.ArticleService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +30,22 @@ public class ArticleController {
     public Result<ArticleVO> detail(@PathVariable Long id,
                                     @RequestAttribute(value = "userId",required = false) Long userId) {
         return Result.success(articleService.detail(id,userId));
+    }
+
+    /** 点赞/取消点赞切换（登录），返回最新点赞数和状态 */
+    @PostMapping("/{id}/like")
+    public Result<ArticleVO> toggleLike(@RequestAttribute("userId") Long userId,
+                                        @PathVariable Long id) {
+        return Result.success(articleService.toggleLike(id, userId));
+    }
+
+    /** 记录浏览（公开，登录用户按 userId 防刷，未登录按 IP 防刷，24h 窗口） */
+    @PostMapping("/{id}/view")
+    public Result<Integer> recordView(@RequestAttribute(value = "userId", required = false) Long userId,
+                                      @PathVariable Long id,
+                                      HttpServletRequest request) {
+        String ip = request.getRemoteAddr();
+        return Result.success(articleService.recordView(id, userId, ip));
     }
 
     @GetMapping("/mine")
