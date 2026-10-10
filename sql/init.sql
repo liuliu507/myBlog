@@ -109,6 +109,20 @@ CREATE TABLE `article_tag` (
   KEY `idx_tag` (`tag_id`) COMMENT '按标签反查文章'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='文章-标签关联表';
 
+CREATE TABLE `notification` (
+  `id`            BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `user_id`       BIGINT       NOT NULL COMMENT '接收者（文章作者/被回复人）',
+  `sender_id`     BIGINT       NOT NULL COMMENT '触发者',
+  `type`          VARCHAR(16)  NOT NULL COMMENT '通知类型 comment/reply/like',
+  `article_id`    BIGINT       NOT NULL COMMENT '关联文章',
+  `article_title` VARCHAR(200) DEFAULT NULL COMMENT '文章标题快照（文章删除后仍可展示）',
+  `comment_text`  VARCHAR(200) DEFAULT NULL COMMENT '评论内容快照（点赞通知为空）',
+  `is_read`       TINYINT      NOT NULL DEFAULT 0 COMMENT '是否已读 0未读 1已读',
+  `created_at`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_user_read` (`user_id`, `is_read`, `id`) COMMENT '覆盖未读数统计与通知列表分页'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='站内消息通知表';
+
 INSERT INTO `user` (`email`, `password`, `nickname`)
 VALUES ('test@example.com', 'placeholder_will_be_replaced', '测试用户');
 

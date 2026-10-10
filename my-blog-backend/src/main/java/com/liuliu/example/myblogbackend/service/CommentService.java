@@ -32,6 +32,9 @@ public class CommentService {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private NotificationService notificationService;
+
     /** 发表评论（登录）；parentId 非空表示回复某条一级评论（只允许二级） */
     public CommentVO create(Long userId, CommentRequest req) {
         Article article = articleMapper.selectById(req.getArticleId());
@@ -56,6 +59,11 @@ public class CommentService {
         c.setParentId(req.getParentId());
         c.setContent(req.getContent());
         commentMapper.insert(c);
+        // 站内通知：一级评论通知文章作者，回复通知被回复人（自己操作自己不发）
+        boolean isReply = parent != null;
+        Long receiverId = isReply ? parent.getUserId() : article.getUserId();
+        notificationService.sendComment(isReply, receiverId, userId, article.getId(),
+                article.getTitle(), req.getContent());
         return toVO(c, loadUsers(List.of(userId)));
     }
 

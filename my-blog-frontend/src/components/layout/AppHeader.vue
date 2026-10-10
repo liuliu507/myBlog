@@ -28,6 +28,20 @@
         </el-input>
       </div>
       <template v-if="userStore.isLoggedIn">
+        <!-- 消息通知铃铛：30s 轮询未读数 -->
+        <el-badge
+          :value="notifStore.unreadCount"
+          :hidden="notifStore.unreadCount === 0"
+          :max="99"
+          class="bell-badge"
+        >
+          <el-button text class="bell-btn" aria-label="消息通知" @click="$router.push('/notifications')">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 9a6 6 0 1 0-12 0c0 6-2.5 7.5-2.5 7.5h17S18 15 18 9" />
+              <path d="M10 20a2.2 2.2 0 0 0 4 0" />
+            </svg>
+          </el-button>
+        </el-badge>
         <el-button text @click="$router.push('/mine')">我的文章</el-button>
         <el-button text @click="$router.push('/categories')">分类</el-button>
         <el-button type="primary" @click="$router.push('/editor')">写文章</el-button>
@@ -75,21 +89,45 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { useAiStore } from '@/stores/ai'
+import { useNotificationStore } from '@/stores/notification'
 import { uploadAvatar } from '@/api/upload'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 const aiStore = useAiStore()
+const notifStore = useNotificationStore()
 const fileInput = ref(null)
 const uploading = ref(false)
 const keyword = ref('')
 const mobileSearchOpen = ref(false)
+
+// 未读通知数轮询：登录后立即拉一次并每 30s 刷新，登出时清零停表
+let pollTimer = null
+watch(
+  () => userStore.isLoggedIn,
+  (loggedIn) => {
+    if (pollTimer) {
+      clearInterval(pollTimer)
+      pollTimer = null
+    }
+    if (loggedIn) {
+      notifStore.refresh()
+      pollTimer = setInterval(() => notifStore.refresh(), 30000)
+    } else {
+      notifStore.clear()
+    }
+  },
+  { immediate: true }
+)
+onUnmounted(() => {
+  if (pollTimer) clearInterval(pollTimer)
+})
 
 function doSearch() {
   const kw = keyword.value.trim()
@@ -193,6 +231,14 @@ async function onFileChange(e) {
   display: flex;
   align-items: center;
   flex-shrink: 0;
+}
+/* 通知铃铛 */
+.bell-badge {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+.bell-btn {
+  padding: 8px 4px;
 }
 .search-toggle {
   display: none;

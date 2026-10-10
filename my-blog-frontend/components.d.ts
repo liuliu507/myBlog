@@ -15,6 +15,7 @@ declare module 'vue' {
     AppHeader: typeof import('./src/components/layout/AppHeader.vue')['default']
     AuthCard: typeof import('./src/components/auth/AuthCard.vue')['default']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
+    ElBadge: typeof import('element-plus/es')['ElBadge']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCard: typeof import('element-plus/es')['ElCard']
     ElContainer: typeof import('element-plus/es')['ElContainer']

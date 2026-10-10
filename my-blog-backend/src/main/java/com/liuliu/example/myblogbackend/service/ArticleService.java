@@ -75,6 +75,9 @@ public class ArticleService {
     private RedisUtil redisUtil;
 
     @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     /**
@@ -309,6 +312,8 @@ public class ArticleService {
             like.setArticleId(articleId);
             like.setUserId(userId);
             articleLikeMapper.insert(like);
+            // 站内通知：点赞通知文章作者（自己赞自己不发，未读期间同人同文章去重）
+            notificationService.sendLike(article.getUserId(), userId, articleId, article.getTitle());
         }
         ArticleVO vo = new ArticleVO();
         vo.setId(articleId);
