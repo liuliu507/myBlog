@@ -1,10 +1,14 @@
 package com.liuliu.example.myblogbackend.util;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class RedisUtil {
@@ -22,6 +26,23 @@ public class RedisUtil {
 
     public void delete(String key) {
         redisTemplate.delete(key);
+    }
+
+    /**
+     * 按前缀批量删除。用 SCAN 渐进式扫描而不是 KEYS：
+     * KEYS 一次遍历全部 key 会阻塞 Redis 主线程，key 多时造成线上卡顿；SCAN 分批游标遍历不阻塞
+     */
+    public void deleteByPrefix(String prefix) {
+        ScanOptions options = ScanOptions.scanOptions().match(prefix + "*").count(200).build();
+        List<String> keys = new ArrayList<>();
+        try (Cursor<String> cursor = redisTemplate.scan(options)) {
+            while (cursor.hasNext()) {
+                keys.add(cursor.next());
+            }
+        }
+        if (!keys.isEmpty()) {
+            redisTemplate.delete(keys);
+        }
     }
 
     public Boolean hasKey(String key) {
