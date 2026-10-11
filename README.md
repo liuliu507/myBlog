@@ -13,18 +13,20 @@
 
 ## 功能特性
 
-**用户体系**：注册 / 登录 / JWT 鉴权 / 忘记密码（邮件验证码）
-**文章管理**：Markdown 编辑器、分类、标签、关键词搜索
-**互动功能**：二级楼中楼评论、点赞、浏览数（防刷）
-**AI 对话**：智谱 GLM 流式输出、对话历史持久化
-**图片上传**：腾讯云 COS（后端转发，密钥不暴露前端）
-**通知系统**：评论 / 点赞通知、未读计数
-**响应式设计**：桌面优先 + 移动端适配
+- **用户体系**：注册 / 登录 / JWT 鉴权 / 忘记密码（邮件验证码）
+- **文章管理**：Markdown 编辑器、分类、标签、关键词搜索
+- **互动功能**：二级楼中楼评论、点赞、浏览数（防刷）
+- **AI 对话**：智谱 GLM 流式输出、对话历史持久化
+- **图片上传**：腾讯云 COS（后端转发，密钥不暴露前端）
+- **通知系统**：评论 / 点赞通知、未读计数
+- **响应式设计**：桌面优先 + 移动端适配
 
 ---
 
 ## 技术栈
 
+| 层级 | 技术 |
+|------|------|
 | **后端** | Spring Boot 4.1、Java 21、MyBatis Plus 3.5、Spring Security Crypto、JJWT 0.12、WebFlux（WebClient） |
 | **前端** | Vue 3.5、Vite 8、Element Plus 2.14、Pinia 4、Vue Router 5、Axios、md-editor-v3 |
 | **存储** | MySQL 8.4、Redis 7、腾讯云 COS |
@@ -133,7 +135,7 @@ docker compose up -d --build
 
 ---
 
-## ⚙️ 环境变量配置
+## 环境变量配置
 
 所有敏感值通过 `.env` 文件注入（`.env` 不提交到 Git）。复制 `.env.example` 后填写：
 
@@ -208,11 +210,13 @@ npm run dev
 docker compose up -d --build
 ```
 
-### ⚠️ 注意事项
+### 注意事项
 
 - **重新部署禁止使用 `docker compose down -v`**，否则会删除 MySQL 数据卷导致数据丢失。应使用 `docker compose up -d --build` 重启。
 - `sql/init.sql` **仅在数据卷首次初始化时执行**。后续新增的表（如 `chat_message`、`comment`、`article_like`）需手动进入 MySQL 执行建表语句。
 - 新增环境变量后，需同时更新 `.env.example`、`docker-compose.yml` 和 `application-prod.yml`，保持链路一致。
+
+---
 
 
 ## API 概览
